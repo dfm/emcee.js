@@ -35,5 +35,5 @@ Usage
 Example
 -------
 
-You can also run an example using the `emceeTest` function. Look at the
-source code...
+To see an example, run `python -m SimpleHTTPServer 8000` in the root directory of this
+repository and navigate to [localhost:8000/examples](http://localhost:8000/examples).

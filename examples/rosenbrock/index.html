@@ -9,24 +9,60 @@
     <script type="text/javascript" src="http://d3js.org/d3.v2.min.js"></script>
 
     <style type="text/css">
-        #container circle {
-            fill: #0064cd;
-            stroke: #0064cd;
-            opacity: 0.2;
+
+        body {
+            background: #111;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-weight: 300;
+            color: #eee;
         }
+
+        a {
+            text-decoration: none;
+            color: #eee;
+        }
+
+        h1 {
+            font-weight: normal;
+            font-size: 30px;
+        }
+
+        h1 small {
+            font-weight: 200;
+            font-size: 22px;
+            color: #ccc;
+        }
+
+        #container {
+            width: 800px;
+            margin: 0 auto;
+        }
+
+        #container circle {
+            fill: #7a43b6;
+            stroke: #7a43b6;
+            opacity: 0.3;
+        }
+
     </style>
 
 </head>
 <body>
 
-    <div id="container"></div>
+
+    <div id="container">
+        <h1>
+            <a href="https://github.com/dfm/emcee.js">emcee.js</a>
+            <small>| The Rosenbrock Density</small>
+        </h1>
+    </div>
 
     <script>
 
         var a1, a2, rosenbrock, initialPosition, sampler, chain;
 
         // Define the Rosenbrock density.
-        a1 = 100.0, a2 = 20.0;
+        a1 = 100.0, a2 = 50.0;
         rosenbrock = function (p) {
             var d1, d2;
             d1 = p[1] - p[0] * p[0];
@@ -41,12 +77,12 @@
         // Final chain.
         chain = sampler.runMCMC(initialPosition, 1);
 
-        var x = d3.scale.linear().range([0, 400]).domain([-8,8]),
-            y = d3.scale.linear().range([400, 0]).domain([-5, 20]);
+        var x = d3.scale.linear().range([0, 800]).domain([-6, 6]),
+            y = d3.scale.linear().range([500, 0]).domain([-1, 30]);
 
         var svg = d3.select("#container").append("svg:svg")
-                    .attr("width", 400)
-                    .attr("height", 400)
+                    .attr("width", 800)
+                    .attr("height", 500)
                     .append("svg:g");
 
         var circle = svg.selectAll("circle")

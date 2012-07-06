@@ -7,8 +7,30 @@
 
     <script type="text/javascript" src="emcee.js"></script>
 
+
 </head>
 <body>
+
+
+<script>
+
+    var a1, a2, rosenbrock, initialPosition, sampler, chain;
+
+    a1 = 100.0, a2 = 20.0;
+    rosenbrock = function (p) {
+        var d1, d2;
+        d1 = p[1] - p[0] * p[0];
+        d2 = 1 - p[0];
+        return -(a1 * d1 * d1 + d2 * d2) / a2;
+    };
+
+    initialPosition = emcee.smallBall(100, [0.0, 0.0], [0.1, 0.1]);
+    sampler = new emcee.EnsembleSampler(rosenbrock);
+    chain = sampler.runMCMC(initialPosition, 5000);
+
+    console.log(sampler.acceptanceFraction);
+
+</script>
 
 </body>
 </html>

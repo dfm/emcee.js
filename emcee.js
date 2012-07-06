@@ -169,6 +169,15 @@ var emceeTest = function () {
         return this.chain;
     };
 
+    EnsembleSampler.prototype.getFlatChain = function () {
+        // Get the chain flattened to the shape `(iterations, dimension)`.
+        var i, k, result = new Array();
+        for (i = 0; i < this.chain.length; i++)
+            for (k = 0; k < this.nWalkers; k++)
+                result[i * this.nWalkers + k] = this.chain[i][k];
+        return result;
+    };
+
     window.emcee = {
         EnsembleSampler: EnsembleSampler,
         smallBall: smallBall,

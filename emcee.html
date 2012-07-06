@@ -6,31 +6,70 @@
     <title>emcee.js</title>
 
     <script type="text/javascript" src="emcee.js"></script>
+    <script type="text/javascript" src="http://d3js.org/d3.v2.min.js"></script>
 
+    <style type="text/css">
+        #container circle {
+            fill: #0064cd;
+            stroke: #0064cd;
+            opacity: 0.2;
+        }
+    </style>
 
 </head>
 <body>
 
+    <div id="container"></div>
 
-<script>
+    <script>
 
-    var a1, a2, rosenbrock, initialPosition, sampler, chain;
+        var a1, a2, rosenbrock, initialPosition, sampler, chain;
 
-    a1 = 100.0, a2 = 20.0;
-    rosenbrock = function (p) {
-        var d1, d2;
-        d1 = p[1] - p[0] * p[0];
-        d2 = 1 - p[0];
-        return -(a1 * d1 * d1 + d2 * d2) / a2;
-    };
+        // Define the Rosenbrock density.
+        a1 = 100.0, a2 = 20.0;
+        rosenbrock = function (p) {
+            var d1, d2;
+            d1 = p[1] - p[0] * p[0];
+            d2 = 1 - p[0];
+            return -(a1 * d1 * d1 + d2 * d2) / a2;
+        };
 
-    initialPosition = emcee.smallBall(100, [0.0, 0.0], [0.1, 0.1]);
-    sampler = new emcee.EnsembleSampler(rosenbrock);
-    chain = sampler.runMCMC(initialPosition, 5000);
+        // Set up the sampler.
+        initialPosition = emcee.smallBall(1000, [0, 15.0], [0.01, 0.01]);
+        sampler = new emcee.EnsembleSampler(rosenbrock);
 
-    console.log(sampler.acceptanceFraction);
+        // Final chain.
+        chain = sampler.runMCMC(initialPosition, 1);
 
-</script>
+        var x = d3.scale.linear().range([0, 400]).domain([-8,8]),
+            y = d3.scale.linear().range([400, 0]).domain([-5, 20]);
+
+        var svg = d3.select("#container").append("svg:svg")
+                    .attr("width", 400)
+                    .attr("height", 400)
+                    .append("svg:g");
+
+        var circle = svg.selectAll("circle")
+           .data(sampler.chain[sampler.chain.length - 1])
+          .enter().append("circle")
+           .attr("cx", function(d) { return x(d[0]); })
+           .attr("cy", function(d) { return y(d[1]); })
+           .attr("r", 1.5);
+
+        redraw = function () {
+            chain = sampler.runMCMC(chain[chain.length - 1], 1);
+            var circle = svg.selectAll("circle")
+                    .data(chain[chain.length - 1])
+                    .attr("cx", function(d) { return x(d[0]); })
+                    .attr("cy", function(d) { return y(d[1]); });
+        };
+
+        setInterval(function() {
+            redraw();
+            d3.timer.flush(); // avoid memory leak when in background tab
+        }, 0);
+
+    </script>
 
 </body>
 </html>

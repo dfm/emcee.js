@@ -73,9 +73,7 @@
         // Set up the sampler.
         initialPosition = emcee.smallBall(1000, [0, 15.0], [0.01, 0.01]);
         sampler = new emcee.EnsembleSampler(rosenbrock);
-
-        // Final chain.
-        chain = sampler.runMCMC(initialPosition, 1);
+        sampler.runMCMC(initialPosition, 1);
 
         var x = d3.scale.linear().range([0, 800]).domain([-6, 6]),
             y = d3.scale.linear().range([500, 0]).domain([-1, 30]);
@@ -85,6 +83,16 @@
                     .attr("height", 500)
                     .append("svg:g");
 
+        var rect = svg.append("rect")
+                    .attr("width", "100%")
+                    .attr("height", "100%")
+                    .attr("opacity", 0)
+                    .on("click", function (d, i) {
+                        var mp = d3.mouse(this);
+                        initialPosition = emcee.smallBall(1000, [x.invert(mp[0]), y.invert(mp[1])], [0.01, 0.01]);
+                        redraw();
+                    });
+
         var circle = svg.selectAll("circle")
            .data(sampler.chain[sampler.chain.length - 1])
           .enter().append("circle")
@@ -93,7 +101,8 @@
            .attr("r", 1.5);
 
         redraw = function () {
-            chain = sampler.runMCMC(chain[chain.length - 1], 1);
+            chain = sampler.runMCMC(initialPosition, 1);
+            initialPosition = chain[chain.length - 1];
             var circle = svg.selectAll("circle")
                     .data(chain[chain.length - 1])
                     .attr("cx", function(d) { return x(d[0]); })

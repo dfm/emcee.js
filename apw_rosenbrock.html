@@ -20,11 +20,31 @@
             background: #000;
             margin: 0px;
             text-align: center;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-weight: 300;
+        }
+        
+        h1 {
+            font-weight: normal;
+            font-size: 30px;
+        }
+
+        h1 small {
+            font-weight: 200;
+            font-size: 22px;
+            color: #ccc;
         }
         
         #viz {
-            width: 1400px;
+            width: 800px;
             height: 700px;
+            border-right: 1px solid #333;
+            border-bottom: 1px solid #333;
+        }
+        
+        #container {
+            margin: 0 auto;
+            float: right;
         }
         
         circle.mouseFollower {
@@ -43,6 +63,14 @@
             fill: rgba(25,75,180,0.75);
             fill-opacity: 0.4;
             stroke: rgba(50,100,250,0.75);
+        }
+        
+        #info {
+            position: absolute;
+            left: 20px;
+            top: 10px;
+            color: #666;
+            text-align: left;
         }
 
     </style>
@@ -68,9 +96,10 @@
             
             // Define the Rosenbrock density.
             var xx,yy;
+            var halfWidth = $("#viz").width()/2;
             a1 = 100.0, a2 = 50.0;
             rosenbrock = function (p) {
-                xx = 0.5*(p[0]-700);
+                xx = 0.8*(p[0]-halfWidth);
                 yy = 100*(p[1]-50);
                 var d1, d2;
                 d1 = yy - xx*xx;
@@ -133,6 +162,16 @@
     
 </head>
 <body>
+    <div id="container">
+        <h1>
+            <a href="https://github.com/dfm/emcee.js">emcee.js</a>
+            <small>| The Rosenbrock Density</small>
+        </h1>
+    </div>
+    <div id="info">
+        Click and drag to scale circle.<br/>
+        &lt;Enter&gt; to start sampler.
+    </div>
     <div id="viz"></div>
     
     <script type="text/javascript">

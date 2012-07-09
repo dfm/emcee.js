@@ -92,12 +92,12 @@
             
             // Number of walkers scales with the size of the circle
             //var numWalkers = parseInt(r)*100;
-            var numWalkers = 5000;
+            var numWalkers = 4000;
             
             // Define the Rosenbrock density.
             var xx,yy;
             var halfWidth = $("#viz").width()/2;
-            a1 = 100.0, a2 = 50.0;
+            a1 = 1.0, a2 = 20000000.0;
             rosenbrock = function (p) {
                 xx = 0.8*(p[0]-halfWidth);
                 yy = 100*(p[1]-50);
@@ -137,8 +137,6 @@
                 .attr("cx", function(coord) { return coord[0]; })
                 .attr("cy", function(coord) { return coord[1]; })
                 .attr("class", "walkerStart");
-            
-            //sampler.runMCMC(initialPosition, 100);
             
             redraw = function () {
                 chain = sampler.runMCMC(initialPosition, 1);

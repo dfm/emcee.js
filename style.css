@@ -1,0 +1,106 @@
+html,body { 
+    background: #000;
+    margin: 0px;
+    text-align: center;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+}
+
+h1 {
+    font-weight: normal;
+    font-size: 30px;
+}
+
+h1 small {
+    font-weight: 200;
+    font-size: 22px;
+    color: #ccc;
+}
+
+a {
+    color: rgba(25,75,180,0.75);
+}
+
+a:visited {
+    color: rgba(25,75,180,0.75);
+}
+
+/* =======================================================================================*/
+/* Overlay text */
+
+div.container {
+    position: absolute;
+    width: 100%;
+}
+
+div#header {
+    font-weight: normal;
+    font-size: 30px;
+    
+    margin: 0 auto;
+    margin-top: 15px;
+    margin-right: 25px;
+    float: right;
+}
+
+div#header small {
+    font-weight: 200;
+    font-size: 22px;
+    color: #cdcdcd;
+}
+
+div#info {
+    text-align: left;
+    color: #aaa;
+    
+    margin: 0 auto;
+    margin-top: 25px;
+    margin-left: 25px;
+    float: left;
+}
+
+/* =======================================================================================*/
+/* D3 objects */
+
+div#mcmc_viz {
+    margin: 0 auto;
+    float: left;
+    
+    width: 49.9999%;
+    height: 700px;
+    border-right: 1px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+div#plot_viz {
+    margin: 0 auto;
+    float: right;
+    
+    width: 49.9999%;
+    height: 700px;
+    border-left: 1px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+circle.mouseFollower {
+    fill: #ccc;
+    fill-opacity: 0.0;
+    stroke: rgba(25,75,180,0.75);
+    stroke-width: 2px;
+}
+
+circle.walkerStart {
+    fill: #ccc;
+    fill-opacity: 0.5;
+}
+
+line.walkerStartLines {
+    stroke: rgba(180,75,25,0.75);
+    opacity: 0.3;
+}
+
+#mcmcInitCircle {
+    fill: rgba(25,75,180,0.75);
+    fill-opacity: 0.4;
+    stroke: rgba(50,100,250,0.75);
+}

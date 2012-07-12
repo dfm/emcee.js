@@ -1,0 +1,259 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+    <title>emcee.js</title>
+
+    <script type="text/javascript" src="emcee.js"></script>
+    
+    <!-- External Javascript with Local Fallbacks -->
+    <!--
+    <script src="http://d3js.org/d3.v2.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+    -->
+    <script src="ext/d3.v2.min.js"></script>
+    <script src="ext/jquery-1.6.1.min.js"></script>
+    
+    <link href="style.css" rel="stylesheet">
+    
+    <script type="text/javascript">
+        
+        function sampleCircle(x, y, r) {
+            
+            var r0 = r*Math.sqrt(Math.random());
+            var phi = 2.*3.1415926*Math.random();
+            var x0 = r0*Math.cos(phi);
+            var y0 = r0*Math.sin(phi);
+            
+            return [x+x0, y+y0]
+        }
+        
+        function apwEmceeTest(x, y, r) {
+            var density_function, initialPosition, sampler, chain;
+            var NUM_WALKERS = 100;
+            
+            var slopes = [0, 100.],
+                intercepts = [0, 100.];
+            
+            // Define the density.
+            var xx,yy;
+            var width = $("#mcmc_viz").width(),
+                height = $("#mcmc_viz").height(),
+                halfWidth = $("#mcmc_viz").width()/2,
+                halfHeight = $("#mcmc_viz").height()/2;
+            
+            var data_to_pixel_x = d3.scale.linear().range([0, width]).domain(slopes),
+                data_to_pixel_y = d3.scale.linear().range([height, 0]).domain(intercepts);
+            
+            var pixel_to_data_x = d3.scale.linear().range(slopes).domain([0, width]),
+                pixel_to_data_y = d3.scale.linear().range(intercepts).domain([height, 0]);
+                
+            // The density function is in *data* coorindates
+            var sigma = 0.35;
+            density_function = function (p) {
+                /*if ((p[0] > scalex(10)) || (p[0] < scalex(-10)) || (p[1] > scaley(-10)) || (p[1] < scaley(10))) {
+                    return -999999999999999999.   
+                }*/
+                xx = (p[0]-5);
+                yy = (p[1]-5);
+                
+                return 500. - (xx*xx + yy*yy)/(2*sigma*sigma);
+            };
+        
+            // Set up the sampler.
+            var initialPosition = new Array();
+            for (i = 0; i < NUM_WALKERS; i++) {
+                var coord = sampleCircle(x,y,r);
+                initialPosition.push([pixel_to_data_x(coord[0]), pixel_to_data_y(coord[1])]);
+            }
+            
+            sampler = new emcee.EnsembleSampler(density_function);
+            
+            // If there is already a circle of walkers on the SVG, delete the walker initial
+            //  position circles
+            if (mcmc_svg.selectAll(".walkerStart") != null) {
+                mcmc_svg.selectAll(".walkerStart").data([]).exit().remove();    
+            }
+            
+            // If there are already a bunch of lines on the plot SVG, delete them
+            if (plot_svg.selectAll(".walkerStartLines") != null) {
+                plot_svg.selectAll(".walkerStartLines").data([]).exit().remove();
+            }
+            
+            mcmc_svg.selectAll(".walkerStart")
+                .data(initialPosition)
+                .enter().append("circle")
+                .attr("r", 1.5)
+                .attr("cx", function(coord) { return data_to_pixel_x(coord[0]); })
+                .attr("cy", function(coord) { return data_to_pixel_y(coord[1]); })
+                .attr("class", "walkerStart");
+            
+            // m = coord[0], b = coord[1]
+            plot_svg.selectAll(".walkerStartLines")
+                .data(initialPosition)
+                .enter().append("line")
+                .attr("x1", 0)
+                .attr("y1", function(coord) { return data_to_pixel_y(coord[1]); })
+                .attr("x2", width)
+                .attr("y2", function(coord) { return data_to_pixel_y(coord[0]*pixel_to_data_x(width) + coord[1]); })
+                .attr("class", "walkerStartLines");
+            
+            redraw = function () {
+                chain = sampler.runMCMC(initialPosition, 1);
+                initialPosition = chain[chain.length - 1];
+                
+                var circle = mcmc_svg.selectAll(".walkerStart")
+                        .data(initialPosition)
+                        .attr("cx", function(d) { return data_to_pixel_x(d[0]); })
+                        .attr("cy", function(d) { return data_to_pixel_y(d[1]); });
+                
+
+                var lines = plot_svg.selectAll(".walkerStartLines")
+                        .data(initialPosition)
+                        .attr("x1", 0)
+                        .attr("y1", function(d) { return data_to_pixel_y(d[1]); })
+                        .attr("x2", width)
+                        .attr("y2", function(d) { return data_to_pixel_y(d[0]*pixel_to_data_x(width) + d[1]); });
+            };
+            
+            setInterval(function() {
+                redraw();
+                d3.timer.flush(); // avoid memory leak when in background tab
+            }, 0);
+            
+            return;
+            
+        };
+    </script>
+    
+</head>
+<body>
+    <div class="container">
+        <div id="info">
+            Click and drag to scale circle.<br/>
+            &lt;Enter&gt; to start sampler.
+        </div>
+        <div id="header">
+            <a href="https://github.com/dfm/emcee.js">emcee.js</a>
+            <small>| Fitting a line to data</small>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div id="mcmc_viz"></div>
+        <div id="plot_viz">geez</div>
+    </div>
+    
+    <script type="text/javascript">
+        // - Density function should be chi-squared of a bunch of data points, e.g. see Hogg's Fitting
+        //      a line to data.
+        
+        var w = $("#mcmc_viz").width(),
+            h = $("#mcmc_viz").height();
+        
+        // Set minimum and maximum size to the MCMC initialization circle
+        var minimum_r = 20,
+            maximum_r = 200;
+        
+        var x0 = 0.,
+            y0 = 0.,
+            x1 = 0.,
+            y1 = 0.;
+            
+        var mouseDown = 0;
+        
+        var mcmc_svg = d3.select("#mcmc_viz").append("svg")
+            .attr("width", w)
+            .attr("height", h)
+            .on("mousemove", vizMousemove)
+            .on("mousedown", vizMousedown)
+            .on("mouseup", vizMouseup);
+        
+        var plot_svg = d3.select("#plot_viz").append("svg")
+            .attr("width", w)
+            .attr("height", h);
+            //.on("mousemove", plotMousemove)
+            //.on("mousedown", plotMousedown)
+            //.on("mouseup", plotMouseup);
+        
+        function vizMousedown() {
+            var coord = d3.svg.mouse(this);
+            x0 = coord[0];
+            y0 = coord[1];
+            mouseDown = 1;
+        };
+        
+        function vizMouseup() {
+            var coord = d3.svg.mouse(this);
+            x1 = coord[0];
+            y1 = coord[1];
+            mouseDown = 0;
+            
+            r = Math.sqrt(Math.pow(x1-x0,2) + Math.pow(y1-y0,2));
+            // Enforce maximum and minimum radius values
+            if (r < minimum_r || r > maximum_r) {
+                return
+            }
+            d3.select("circle")
+                .attr("r", r);
+        };
+        
+        function vizMousemove() {
+            var coord = d3.svg.mouse(this);
+            
+            if (d3.select("circle") == "") {
+                mcmc_svg.append("circle")
+                .attr("r", 16)
+                .attr("cx", coord[0])
+                .attr("cy", coord[1])
+                .attr("class", "mouseFollower");
+            }
+            
+            if (mouseDown == 1) {
+                var r = Math.sqrt(Math.pow(coord[0]-x0,2) + Math.pow(coord[1]-y0,2));
+                // Enforce maximum and minimum radius values
+                if (r < minimum_r || r > maximum_r) {
+                    return
+                }
+                
+                d3.select("circle")
+                    .attr("cx", coord[0])
+                    .attr("cy", coord[1])
+                    .attr("r", r);
+            } else {
+                d3.select("circle")
+                    .attr("cx", coord[0])
+                    .attr("cy", coord[1]);
+            }
+        };
+        
+        var event = null;
+        d3.select(window).on("keydown", function() {
+            switch (d3.event.keyCode) {
+                case 13: 
+                    var x = parseFloat(d3.select("circle")
+                        .attr("cx"));
+                    var y = parseFloat(d3.select("circle")
+                        .attr("cy"));
+                    var r = parseFloat(d3.select("circle")
+                        .attr("r"));
+                    
+                    if (d3.select("#mcmcInitCircle") == "") {
+                        mcmc_svg.append("circle")
+                            .attr("id", "mcmcInitCircle");
+                    }
+                    
+                    mcmc_svg.select("#mcmcInitCircle")
+                        .attr("r", r)
+                        .attr("cx", x)
+                        .attr("cy", y);
+                    
+                    var sampler = apwEmceeTest(x, y, r);
+            }
+        });
+            
+    </script>
+    
+</body>
+</html>

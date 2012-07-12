@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
-    <title>emcee.js</title>
+    <title>emcee.js | Fitting a line</title>
 
     <script type="text/javascript" src="emcee.js"></script>
     
@@ -32,6 +32,8 @@
         function apwEmceeTest(x, y, r) {
             var density_function, initialPosition, sampler, chain;
             var NUM_WALKERS = 100;
+            var TRUE_SLOPE = 1.0,
+                TRUE_INTERCEPT = 10.0;
             
             var slopes = [0, 100.],
                 intercepts = [0, 100.];
@@ -50,15 +52,16 @@
                 pixel_to_data_y = d3.scale.linear().range(intercepts).domain([height, 0]);
                 
             // The density function is in *data* coorindates
-            var sigma = 0.35;
+            var sigma_x = 0.05,
+                sigma_y = 4.0;
             density_function = function (p) {
                 /*if ((p[0] > scalex(10)) || (p[0] < scalex(-10)) || (p[1] > scaley(-10)) || (p[1] < scaley(10))) {
                     return -999999999999999999.   
                 }*/
-                xx = (p[0]-5);
-                yy = (p[1]-5);
+                xx = (p[0]-TRUE_SLOPE);
+                yy = (p[1]-TRUE_INTERCEPT);
                 
-                return 500. - (xx*xx + yy*yy)/(2*sigma*sigma);
+                return 500. - (xx*xx/(2*sigma_x*sigma_x) + yy*yy/(2*sigma_y*sigma_y));
             };
         
             // Set up the sampler.
@@ -153,7 +156,7 @@
             h = $("#mcmc_viz").height();
         
         // Set minimum and maximum size to the MCMC initialization circle
-        var minimum_r = 20,
+        var minimum_r = 5,
             maximum_r = 200;
         
         var x0 = 0.,

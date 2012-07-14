@@ -5,25 +5,23 @@
 
     <title>emcee.js</title>
 
-    <script type="text/javascript" src="emcee.js"></script>
-    
     <!-- External Javascript with Local Fallbacks -->
-    <!--
     <script src="http://d3js.org/d3.v2.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
-    -->
-    <script src="ext/d3.v2.min.js"></script>
-    <script src="ext/jquery-1.6.1.min.js"></script>
-    
+    <script>if (typeof(d3) === "undefined") { document.write(unescape("%3Cscript src="../../ext/d3.v2.min.js"%3E%3C/script%3E")); }</script>
+    <script>if (typeof(jQuery) === "undefined") { document.write(unescape("%3Cscript src="../../ext/jquery-1.6.1.min.js"%3E%3C/script%3E")); }</script>
+
+    <script type="text/javascript" src="../../emcee.js"></script>
+
     <style type="text/css">
-        html,body { 
+        html,body {
             background: #000;
             margin: 0px;
             text-align: center;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             font-weight: 300;
         }
-        
+
         h1 {
             font-weight: normal;
             font-size: 30px;
@@ -34,37 +32,37 @@
             font-size: 22px;
             color: #ccc;
         }
-        
+
         #viz {
             width: 800px;
             height: 700px;
             border-right: 1px solid #333;
             border-bottom: 1px solid #333;
         }
-        
+
         #container {
             margin: 0 auto;
             float: right;
         }
-        
+
         circle.mouseFollower {
             fill: #ccc;
             fill-opacity: 0.0;
             stroke: rgba(25,75,180,0.75);
             stroke-width: 2px;
         }
-        
+
         circle.walkerStart {
             fill: #ccc;
             fill-opacity: 0.5;
         }
-        
+
         #mcmcInitCircle {
             fill: rgba(25,75,180,0.75);
             fill-opacity: 0.4;
             stroke: rgba(50,100,250,0.75);
         }
-        
+
         #info {
             position: absolute;
             left: 20px;
@@ -74,26 +72,26 @@
         }
 
     </style>
-    
+
     <script type="text/javascript">
-        
+
         function sampleCircle(x, y, r) {
-            
+
             var r0 = r*Math.pow(Math.random(),0.5);
             var phi = 2.*3.1415926*Math.random();
             var x0 = r0*Math.cos(phi);
             var y0 = r0*Math.sin(phi);
-            
+
             return [x+x0, y+y0]
         }
-        
+
         function apwEmceeTest(x, y, r) {
             var a1, a2, rosenbrock, initialPosition, sampler, chain;
-            
+
             // Number of walkers scales with the size of the circle
             //var numWalkers = parseInt(r)*100;
             var numWalkers = 4000;
-            
+
             // Define the Rosenbrock density.
             var xx,yy;
             var halfWidth = $("#viz").width()/2;
@@ -106,7 +104,7 @@
                 d2 = 1 - xx;
                 return -(a1 * d1 * d1 + d2 * d2) / a2;
             };
-        
+
             // Set up the sampler.
             var coord, sigma;
             var coords = new Array();
@@ -116,20 +114,20 @@
                 coords.push(coord);
                 sigmas.push([0.01,0.01]);
             }
-            
+
             var x = d3.scale.linear().range([0, 800]).domain([-6, 6]),
                 y = d3.scale.linear().range([500, 0]).domain([-1, 30]);
-            
+
             //initialPosition = emcee.smallBall(numWalkers, coord, sigmas);
             initialPosition = coords;
             sampler = new emcee.EnsembleSampler(rosenbrock);
-            
+
             // If there is already a circle of walkers on the SVG, delete the walker initial
             //  position circles
             if (svg.selectAll(".walkerStart") != null) {
-                svg.selectAll(".walkerStart").data([]).exit().remove();    
+                svg.selectAll(".walkerStart").data([]).exit().remove();
             }
-            
+
             svg.selectAll(".walkerStart")
                 .data(coords)
                 .enter().append("circle")
@@ -137,27 +135,27 @@
                 .attr("cx", function(coord) { return coord[0]; })
                 .attr("cy", function(coord) { return coord[1]; })
                 .attr("class", "walkerStart");
-            
+
             redraw = function () {
                 chain = sampler.runMCMC(initialPosition, 1);
                 initialPosition = chain[chain.length - 1];
-                
+
                 var circle = svg.selectAll(".walkerStart")
                         .data(chain[chain.length - 1])
                         .attr("cx", function(d) { return d[0]; })
                         .attr("cy", function(d) { return d[1]; });
             };
-            
+
             setInterval(function() {
                 redraw();
                 d3.timer.flush(); // avoid memory leak when in background tab
             }, 0);
-            
+
             return;
-            
+
         };
     </script>
-    
+
 </head>
 <body>
     <div id="container">
@@ -171,46 +169,46 @@
         &lt;Enter&gt; to start sampler.
     </div>
     <div id="viz"></div>
-    
+
     <script type="text/javascript">
         // - Add drop shadow to circle
         // - Make mouse follower circle disappear when the mouse is off the SVG div
         // - Set maximum and minimum size to the mouse follwer circle
-        
+
         var w = $("#viz").width(),
             h = $("#viz").height();
-        
+
         // Set minimum and maximum size to the MCMC initialization circle
         var minimum_r = 20,
             maximum_r = 200;
-        
+
         var x0 = 0.,
             y0 = 0.,
             x1 = 0.,
             y1 = 0.;
-            
+
         var mouseDown = 0;
-        
+
         var svg = d3.select("#viz").append("svg")
             .attr("width", w)
             .attr("height", h)
             .on("mousemove", vizMousemove)
             .on("mousedown", vizMousedown)
             .on("mouseup", vizMouseup);
-        
+
         function vizMousedown() {
             var coord = d3.svg.mouse(this);
             x0 = coord[0];
             y0 = coord[1];
             mouseDown = 1;
         };
-        
+
         function vizMouseup() {
             var coord = d3.svg.mouse(this);
             x1 = coord[0];
             y1 = coord[1];
             mouseDown = 0;
-            
+
             r = Math.sqrt(Math.pow(x1-x0,2) + Math.pow(y1-y0,2));
             // Enforce maximum and minimum radius values
             if (r < minimum_r || r > maximum_r) {
@@ -219,10 +217,10 @@
             d3.select("circle")
                 .attr("r", r);
         };
-        
+
         function vizMousemove() {
             var coord = d3.svg.mouse(this);
-            
+
             if (d3.select("circle") == "") {
                 svg.append("circle")
                 .attr("r", 16)
@@ -230,14 +228,14 @@
                 .attr("cy", coord[1])
                 .attr("class", "mouseFollower");
             }
-            
+
             if (mouseDown == 1) {
                 var r = Math.sqrt(Math.pow(coord[0]-x0,2) + Math.pow(coord[1]-y0,2));
                 // Enforce maximum and minimum radius values
                 if (r < minimum_r || r > maximum_r) {
                     return
                 }
-                
+
                 d3.select("circle")
                     .attr("cx", coord[0])
                     .attr("cy", coord[1])
@@ -248,32 +246,32 @@
                     .attr("cy", coord[1]);
             }
         };
-        
+
         var event = null;
         d3.select(window).on("keydown", function() {
             switch (d3.event.keyCode) {
-                case 13: 
+                case 13:
                     var x = parseFloat(d3.select("circle")
                         .attr("cx"));
                     var y = parseFloat(d3.select("circle")
                         .attr("cy"));
                     var r = parseFloat(d3.select("circle")
                         .attr("r"));
-                    
+
                     if (d3.select("#mcmcInitCircle") == "") {
                         svg.append("circle")
                             .attr("id", "mcmcInitCircle");
                     }
-                    
+
                     svg.select("#mcmcInitCircle")
                         .attr("r", r)
                         .attr("cx", x)
                         .attr("cy", y);
-                    
+
                     var sampler = apwEmceeTest(x, y, r);
             }
         });
-            
+
     </script>
 </body>
 </html>

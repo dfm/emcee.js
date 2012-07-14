@@ -1,4 +1,4 @@
-html,body { 
+html,body {
     background: #000;
     margin: 0px;
     text-align: center;
@@ -36,7 +36,7 @@ div.container {
 div#header {
     font-weight: normal;
     font-size: 30px;
-    
+
     margin: 0 auto;
     margin-top: 15px;
     margin-right: 25px;
@@ -52,7 +52,7 @@ div#header small {
 div#info {
     text-align: left;
     color: #aaa;
-    
+
     margin: 0 auto;
     margin-top: 25px;
     margin-left: 25px;
@@ -65,8 +65,8 @@ div#info {
 div#mcmc_viz {
     margin: 0 auto;
     float: left;
-    
-    width: 49.9999%;
+
+    width: 48%;
     height: 700px;
     border-right: 1px solid #333;
     border-bottom: 1px solid #333;
@@ -76,8 +76,8 @@ div#plot_viz {
     margin: 0 auto;
     margin-top: -18px;
     float: right;
-    
-    width: 49.9999%;
+
+    width: 48%;
     height: 718px;
     border-left: 1px solid #333;
     border-bottom: 1px solid #333;

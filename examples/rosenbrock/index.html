@@ -71,7 +71,7 @@
         };
 
         // Set up the sampler.
-        initialPosition = emcee.smallBall(1000, [0, 15.0], [0.01, 0.01]);
+        initialPosition = emcee.smallBall(100, [0, 15.0], [0.01, 0.01]);
         sampler = new emcee.EnsembleSampler(rosenbrock);
         sampler.runMCMC(initialPosition, 1);
 
@@ -89,7 +89,7 @@
                     .attr("opacity", 0)
                     .on("click", function (d, i) {
                         var mp = d3.mouse(this);
-                        initialPosition = emcee.smallBall(1000, [x.invert(mp[0]), y.invert(mp[1])], [0.01, 0.01]);
+                        initialPosition = emcee.smallBall(500, [x.invert(mp[0]), y.invert(mp[1])], [0.01, 0.01]);
                         redraw();
                     });
 
@@ -101,7 +101,7 @@
            .attr("r", 1.5);
 
         redraw = function () {
-            chain = sampler.runMCMC(initialPosition, 1);
+            chain = sampler.runMCMC(initialPosition, 2);
             initialPosition = chain[chain.length - 1];
             var circle = svg.selectAll("circle")
                     .data(chain[chain.length - 1])
